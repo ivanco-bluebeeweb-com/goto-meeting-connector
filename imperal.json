@@ -1,0 +1,627 @@
+{
+  "manifest_schema_version": 3,
+  "sdk_version": "5.13.1",
+  "app_id": "goto-meeting-connector",
+  "version": "0.1.0",
+  "name": "GoTo Meeting",
+  "description": "",
+  "icon": "icon.svg",
+  "actions_explicit": true,
+  "system": false,
+  "capabilities": [
+    "gotomeeting:manage"
+  ],
+  "tools": [
+    {
+      "name": "connect_goto_meeting",
+      "description": "Connect your own GoTo Meeting account by saving your OAuth Access Token.",
+      "action_type": "write",
+      "chain_callable": true,
+      "effects": [
+        "create:connection"
+      ],
+      "id_projection": "",
+      "params_schema": {
+        "properties": {
+          "label": {
+            "default": "",
+            "description": "Friendly connection label, e.g. Acme GoTo.",
+            "title": "Label",
+            "type": "string"
+          },
+          "access_token": {
+            "description": "GoTo OAuth 2.0 Bearer Access Token.",
+            "title": "Access Token",
+            "type": "string"
+          }
+        },
+        "required": [
+          "access_token"
+        ],
+        "title": "ConnectGoToParams",
+        "type": "object"
+      },
+      "return_schema": {
+        "properties": {
+          "id": {
+            "description": "Connection ID",
+            "title": "Id",
+            "type": "string"
+          },
+          "label": {
+            "description": "Connection label",
+            "title": "Label",
+            "type": "string"
+          },
+          "status": {
+            "default": "connected",
+            "description": "Connection status",
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "label"
+        ],
+        "title": "ConnectResult",
+        "type": "object"
+      },
+      "event": "goto-meeting-connector.connect_goto_meeting",
+      "background": false,
+      "long_running": false,
+      "scopes": [],
+      "owner_chat_tool": "tool_goto-meeting-connector_chat"
+    },
+    {
+      "name": "list_connections",
+      "description": "List connected GoTo Meeting accounts without exposing credentials.",
+      "action_type": "read",
+      "chain_callable": true,
+      "effects": [],
+      "id_projection": "",
+      "params_schema": {
+        "description": "Empty parameter model.",
+        "properties": {},
+        "title": "NoParams",
+        "type": "object"
+      },
+      "return_schema": {
+        "$defs": {
+          "GoToConnection": {
+            "properties": {
+              "id": {
+                "description": "Connection ID",
+                "title": "Id",
+                "type": "string"
+              },
+              "label": {
+                "description": "Connection label",
+                "title": "Label",
+                "type": "string"
+              },
+              "created_at": {
+                "description": "Connection timestamp",
+                "title": "Created At",
+                "type": "string"
+              }
+            },
+            "required": [
+              "id",
+              "label",
+              "created_at"
+            ],
+            "title": "GoToConnection",
+            "type": "object"
+          }
+        },
+        "properties": {
+          "connections": {
+            "items": {
+              "$ref": "#/$defs/GoToConnection"
+            },
+            "title": "Connections",
+            "type": "array"
+          },
+          "total": {
+            "default": 0,
+            "title": "Total",
+            "type": "integer"
+          }
+        },
+        "title": "ConnectionList",
+        "type": "object"
+      },
+      "event": "",
+      "background": false,
+      "long_running": false,
+      "scopes": [],
+      "owner_chat_tool": "tool_goto-meeting-connector_chat"
+    },
+    {
+      "name": "disconnect_goto_meeting",
+      "description": "Disconnect a GoTo Meeting account.",
+      "action_type": "write",
+      "chain_callable": true,
+      "effects": [
+        "delete:connection"
+      ],
+      "id_projection": "",
+      "params_schema": {
+        "properties": {
+          "connection_id": {
+            "description": "Connection ID to remove.",
+            "title": "Connection Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "connection_id"
+        ],
+        "title": "DisconnectGoToParams",
+        "type": "object"
+      },
+      "return_schema": {
+        "properties": {
+          "status": {
+            "description": "Status",
+            "title": "Status",
+            "type": "string"
+          },
+          "meeting_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Deleted meeting ID",
+            "title": "Meeting Id"
+          }
+        },
+        "required": [
+          "status"
+        ],
+        "title": "DeleteResult",
+        "type": "object"
+      },
+      "event": "goto-meeting-connector.disconnect_goto_meeting",
+      "background": false,
+      "long_running": false,
+      "scopes": [],
+      "owner_chat_tool": "tool_goto-meeting-connector_chat"
+    },
+    {
+      "name": "list_meetings",
+      "description": "List scheduled or historical GoTo meetings.",
+      "action_type": "read",
+      "chain_callable": true,
+      "effects": [],
+      "id_projection": "",
+      "params_schema": {
+        "properties": {
+          "connection_id": {
+            "default": "",
+            "description": "Optional connection ID.",
+            "title": "Connection Id",
+            "type": "string"
+          },
+          "historical": {
+            "default": false,
+            "description": "Whether to include past/historical meetings.",
+            "title": "Historical",
+            "type": "boolean"
+          }
+        },
+        "title": "ListMeetingsParams",
+        "type": "object"
+      },
+      "return_schema": {
+        "properties": {
+          "meetings": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Meetings",
+            "type": "array"
+          },
+          "count": {
+            "default": 0,
+            "title": "Count",
+            "type": "integer"
+          }
+        },
+        "title": "MeetingList",
+        "type": "object"
+      },
+      "event": "",
+      "background": false,
+      "long_running": false,
+      "scopes": [],
+      "owner_chat_tool": "tool_goto-meeting-connector_chat"
+    },
+    {
+      "name": "get_meeting",
+      "description": "Get details of a specific GoTo meeting by ID.",
+      "action_type": "read",
+      "chain_callable": true,
+      "effects": [],
+      "id_projection": "",
+      "params_schema": {
+        "properties": {
+          "meeting_id": {
+            "description": "Numeric GoTo meeting ID.",
+            "title": "Meeting Id",
+            "type": "integer"
+          },
+          "connection_id": {
+            "default": "",
+            "description": "Optional connection ID.",
+            "title": "Connection Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "meeting_id"
+        ],
+        "title": "GetMeetingParams",
+        "type": "object"
+      },
+      "return_schema": {
+        "properties": {
+          "meeting_id": {
+            "description": "Numeric meeting ID",
+            "title": "Meeting Id",
+            "type": "integer"
+          },
+          "subject": {
+            "description": "Meeting subject",
+            "title": "Subject",
+            "type": "string"
+          },
+          "start_time": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Start time",
+            "title": "Start Time"
+          },
+          "end_time": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "End time",
+            "title": "End Time"
+          },
+          "join_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Join URL",
+            "title": "Join Url"
+          }
+        },
+        "required": [
+          "meeting_id",
+          "subject"
+        ],
+        "title": "MeetingRecord",
+        "type": "object"
+      },
+      "event": "",
+      "background": false,
+      "long_running": false,
+      "scopes": [],
+      "owner_chat_tool": "tool_goto-meeting-connector_chat"
+    },
+    {
+      "name": "create_meeting",
+      "description": "Schedule a new GoTo meeting.",
+      "action_type": "write",
+      "chain_callable": true,
+      "effects": [
+        "create:meeting"
+      ],
+      "id_projection": "",
+      "params_schema": {
+        "properties": {
+          "subject": {
+            "description": "Meeting subject/topic.",
+            "title": "Subject",
+            "type": "string"
+          },
+          "start_time": {
+            "description": "Start time (ISO 8601 UTC string, e.g. 2026-09-04T10:00:00Z).",
+            "title": "Start Time",
+            "type": "string"
+          },
+          "end_time": {
+            "description": "End time (ISO 8601 UTC string, e.g. 2026-09-04T11:00:00Z).",
+            "title": "End Time",
+            "type": "string"
+          },
+          "password_required": {
+            "default": false,
+            "description": "Require meeting password.",
+            "title": "Password Required",
+            "type": "boolean"
+          },
+          "conference_call_info": {
+            "default": "Hybrid",
+            "description": "VoIP, Free, Hybrid, Private.",
+            "title": "Conference Call Info",
+            "type": "string"
+          },
+          "connection_id": {
+            "default": "",
+            "description": "Optional connection ID.",
+            "title": "Connection Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "subject",
+          "start_time",
+          "end_time"
+        ],
+        "title": "CreateMeetingParams",
+        "type": "object"
+      },
+      "return_schema": {
+        "properties": {
+          "meeting_id": {
+            "description": "Numeric meeting ID",
+            "title": "Meeting Id",
+            "type": "integer"
+          },
+          "subject": {
+            "description": "Meeting subject",
+            "title": "Subject",
+            "type": "string"
+          },
+          "start_time": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Start time",
+            "title": "Start Time"
+          },
+          "end_time": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "End time",
+            "title": "End Time"
+          },
+          "join_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Join URL",
+            "title": "Join Url"
+          }
+        },
+        "required": [
+          "meeting_id",
+          "subject"
+        ],
+        "title": "MeetingRecord",
+        "type": "object"
+      },
+      "event": "goto-meeting-connector.create_meeting",
+      "background": false,
+      "long_running": false,
+      "scopes": [],
+      "owner_chat_tool": "tool_goto-meeting-connector_chat"
+    },
+    {
+      "name": "delete_meeting",
+      "description": "Delete a scheduled GoTo meeting.",
+      "action_type": "write",
+      "chain_callable": true,
+      "effects": [
+        "delete:meeting"
+      ],
+      "id_projection": "",
+      "params_schema": {
+        "properties": {
+          "meeting_id": {
+            "description": "Numeric GoTo meeting ID.",
+            "title": "Meeting Id",
+            "type": "integer"
+          },
+          "connection_id": {
+            "default": "",
+            "description": "Optional connection ID.",
+            "title": "Connection Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "meeting_id"
+        ],
+        "title": "DeleteMeetingParams",
+        "type": "object"
+      },
+      "return_schema": {
+        "properties": {
+          "status": {
+            "description": "Status",
+            "title": "Status",
+            "type": "string"
+          },
+          "meeting_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Deleted meeting ID",
+            "title": "Meeting Id"
+          }
+        },
+        "required": [
+          "status"
+        ],
+        "title": "DeleteResult",
+        "type": "object"
+      },
+      "event": "goto-meeting-connector.delete_meeting",
+      "background": false,
+      "long_running": false,
+      "scopes": [],
+      "owner_chat_tool": "tool_goto-meeting-connector_chat"
+    },
+    {
+      "name": "audit_goto_health",
+      "description": "Audit GoTo Meeting connectivity and active meetings count.",
+      "action_type": "read",
+      "chain_callable": true,
+      "effects": [],
+      "id_projection": "",
+      "params_schema": {
+        "properties": {
+          "connection_id": {
+            "default": "",
+            "description": "Optional connection ID.",
+            "title": "Connection Id",
+            "type": "string"
+          }
+        },
+        "title": "AuditHealthParams",
+        "type": "object"
+      },
+      "return_schema": {
+        "properties": {
+          "status": {
+            "description": "Status: healthy, degraded, or error",
+            "title": "Status",
+            "type": "string"
+          },
+          "user": {
+            "default": "Unknown",
+            "description": "GoTo user or account",
+            "title": "User",
+            "type": "string"
+          },
+          "meetings_count": {
+            "default": 0,
+            "description": "Active meetings count",
+            "title": "Meetings Count",
+            "type": "integer"
+          },
+          "summary": {
+            "description": "Human-readable health summary",
+            "title": "Summary",
+            "type": "string"
+          }
+        },
+        "required": [
+          "status",
+          "summary"
+        ],
+        "title": "HealthAuditResult",
+        "type": "object"
+      },
+      "event": "",
+      "background": false,
+      "long_running": false,
+      "scopes": [],
+      "owner_chat_tool": "tool_goto-meeting-connector_chat"
+    }
+  ],
+  "signals": [],
+  "schedules": [],
+  "required_scopes": [],
+  "icon_size_bytes": 248,
+  "lifecycle": {
+    "health_check": {
+      "interval_sec": 60
+    }
+  },
+  "panels": [
+    {
+      "panel_id": "goto_meeting_sidebar",
+      "slot": "left",
+      "title": "",
+      "tree": {},
+      "icon": "",
+      "refresh": "manual",
+      "center_overlay": false
+    },
+    {
+      "panel_id": "goto_meeting_settings",
+      "slot": "center",
+      "title": "",
+      "tree": {},
+      "icon": "",
+      "refresh": "manual",
+      "center_overlay": false
+    }
+  ],
+  "pricing": {
+    "model": "per_action",
+    "currency": "tokens",
+    "monthly_price": 0,
+    "revenue_split_dev": 70,
+    "free_tools": [
+      "connect_goto_meeting",
+      "list_connections",
+      "disconnect_goto_meeting"
+    ],
+    "tool_prices": {
+      "connect_goto_meeting": 0,
+      "list_connections": 0,
+      "disconnect_goto_meeting": 0,
+      "audit_goto_health": 40,
+      "list_meetings": 8,
+      "get_meeting": 8,
+      "create_meeting": 16,
+      "delete_meeting": 16
+    }
+  }
+}
