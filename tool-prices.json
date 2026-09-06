@@ -1,10 +1,13 @@
 {
-  "connect_goto_meeting": 0,
-  "list_connections": 0,
-  "disconnect_goto_meeting": 0,
-  "audit_goto_health": 40,
-  "list_meetings": 8,
-  "get_meeting": 8,
-  "create_meeting": 16,
-  "delete_meeting": 16
+  "pricing_model": "per_action",
+  "tool_prices": {
+    "connect_goto_meeting": 0,
+    "list_connections": 0,
+    "disconnect_goto_meeting": 0,
+    "list_meetings": 8,
+    "get_meeting": 8,
+    "create_meeting": 16,
+    "delete_meeting": 16,
+    "audit_goto_health": 40
+  }
 }
