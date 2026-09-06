@@ -1,4 +1,4 @@
-"""Panel UI for GoTo Meeting Connector."""
+"""Panel UI for GoTo Meeting Connector following UI_INTERFACE_STANDARD.md and AUTH_AND_CREDENTIALS_STANDARD.md."""
 from __future__ import annotations
 from imperal_sdk import ui
 from app import ext
@@ -19,9 +19,7 @@ def _help_modal() -> ui.UINode:
         title="Connecting GoTo Meeting",
         children=[
             ui.Text(
-                "1. Sign in to GoTo Developer Center and create an OAuth 2.0 Client.\n"
-                "2. Generate an OAuth Bearer access token with meetings permissions.\n"
-                "3. Enter a label and paste your token below, then click Connect GoTo Meeting.",
+                "1. Sign in to your GoTo Meeting account and navigate to API/Integration or OAuth settings.\n2. Choose your preferred authentication method (OAuth SSO, API Key / Personal Token, or Client Credentials / Service Account).\n3. Authorize or enter your credentials above and click Connect.",
                 variant="body"
             )
         ]
@@ -29,55 +27,86 @@ def _help_modal() -> ui.UINode:
 
 @ext.panel("goto_meeting_sidebar", slot="left")
 async def goto_meeting_sidebar(ctx, **kwargs) -> ui.UINode:
-    connections = await h._load_connections(ctx)
-    conn_items = [
-        ui.Text(c.get("label") or "GoTo Account", variant="body")
-        for c in connections
-    ] if connections else [ui.Text("No GoTo Meeting accounts connected yet.", variant="caption")]
-
     return ui.Stack(
         direction="v",
         gap=3,
+        align="stretch",
         children=[
             ui.Text("GoTo Meeting", variant="heading"),
-            ui.Stack(direction="v", gap=1, children=conn_items),
-            ui.Divider(),
-            ui.Form(
-                submit_label="Connect GoTo Meeting",
-                action=ui.Call("connect_goto_meeting"),
+            ui.Stack(
+                direction="v",
+                gap=1,
+                align="stretch",
                 children=[
-                    ui.Stack(
-                        direction="v",
-                        gap=2,
-                        children=[
-                            ui.Stack(
-                                direction="v",
-                                gap=1,
-                                children=[
-                                    ui.Text("Connection Label", variant="caption"),
-                                    ui.Input(placeholder="e.g. Sales GoTo", param_name="label")
-                                ]
-                            ),
-                            ui.Stack(
-                                direction="v",
-                                gap=1,
-                                children=[
-                                    ui.Text("OAuth Bearer Access Token", variant="caption"),
-                                    ui.Input(placeholder="OAuth Bearer Token", param_name="access_token")
-                                ]
-                            )
-                        ]
-                    )
+                    ui.Text("Manage your GoTo Meeting connections and integrations.", variant="caption"),
                 ]
             ),
             ui.Divider(),
             ui.Stack(
-                direction="h",
+                direction="v",
                 gap=2,
+                align="stretch",
                 children=[
-                    _help_modal(),
-                    _settings_button()
+                    ui.Button(
+                        "Sign in with GoTo Meeting (OAuth / SSO)",
+                        variant="primary",
+                        size="sm",
+                        icon="login"
+                    ),
+                    ui.Divider(),
+                    ui.Text("Or connect via API Key or Service Account", variant="caption"),
+                    ui.Form(
+                        submit_label="Connect GoTo Meeting",
+                        action=ui.Call("connect_goto_meeting"),
+                        children=[
+                            ui.Stack(
+                                direction="v",
+                                gap=2,
+                                align="stretch",
+                                children=[
+                                    ui.Stack(
+                                        direction="v",
+                                        gap=1,
+                                        align="stretch",
+                                        children=[
+                                            ui.Text("Authentication Method", variant="label"),
+                                            ui.Select(
+                                                param_name="auth_mode",
+                                                value="api_key",
+                                                options=[
+                                                    {"label": "API Key / Personal Access Token", "value": "api_key"},
+                                                    {"label": "OAuth 2.0 Bearer Token", "value": "oauth"},
+                                                    {"label": "Client Credentials (Service Account / Machine-to-Machine)", "value": "client_credentials"},
+                                                ]
+                                            ),
+                                        ]
+                                    ),
+                                    ui.Stack(
+                                        direction="v",
+                                        gap=1,
+                                        align="stretch",
+                                        children=[
+                                            ui.Text("Connection Label", variant="label"),
+                                            ui.Input(param_name="label", placeholder="e.g. Production GoTo Meeting"),
+                                        ]
+                                    ),
+                                    ui.Stack(
+                                        direction="v",
+                                        gap=1,
+                                        align="stretch",
+                                        children=[
+                                            ui.Text("API Key / Access Token", variant="label"),
+                                            ui.Input(param_name="api_key", placeholder="Paste API Key, Bearer or Access Token"),
+                                        ]
+                                    ),
+                                ]
+                            )
+                        ]
+                    ),
                 ]
-            )
+            ),
+            _help_modal(),
+            ui.Spacer(),
+            _settings_button(),
         ]
     )
