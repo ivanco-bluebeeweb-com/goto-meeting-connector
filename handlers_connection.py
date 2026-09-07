@@ -64,7 +64,7 @@ async def connect_goto_meeting(ctx, params: ConnectGoToParams) -> ActionResult:
     })
     await _save_connections(ctx, connections)
 
-    return ActionResult.ok(
+    return ActionResult.success(
         {"id": conn_id, "label": label, "status": "connected"},
         summary=f"Successfully connected GoTo Meeting account '{label}'."
     )
@@ -83,7 +83,7 @@ async def list_connections(ctx, params: NoParams) -> ActionResult:
         {"id": c.get("id", ""), "label": c.get("label", ""), "created_at": c.get("created_at", "")}
         for c in conns
     ]
-    return ActionResult.ok(
+    return ActionResult.success(
         {"connections": records, "total": len(records)},
         summary=f"Found {len(records)} connected GoTo Meeting account(s)."
     )
@@ -105,7 +105,7 @@ async def disconnect_goto_meeting(ctx, params: DisconnectGoToParams) -> ActionRe
     if len(connections) == initial_len:
         return ActionResult.error(f"Connection {params.connection_id} not found.")
     await _save_connections(ctx, connections)
-    return ActionResult.ok(
+    return ActionResult.success(
         {"status": "disconnected", "meeting_id": None},
         summary=f"GoTo Meeting connection {params.connection_id} disconnected."
     )

@@ -22,7 +22,7 @@ async def list_meetings(ctx, params: ListMeetingsParams) -> ActionResult:
     client = await resolve_client(ctx, params.connection_id)
     try:
         meetings = await client.list_meetings(historical=params.historical)
-        return ActionResult.ok({"meetings": meetings, "count": len(meetings)}, summary=f"Found {len(meetings)} GoTo meeting(s).")
+        return ActionResult.success({"meetings": meetings, "count": len(meetings)}, summary=f"Found {len(meetings)} GoTo meeting(s).")
     except Exception as e:
         return ActionResult.error(f"Error listing meetings: {e}")
 
@@ -38,7 +38,7 @@ async def get_meeting(ctx, params: GetMeetingParams) -> ActionResult:
     client = await resolve_client(ctx, params.connection_id)
     try:
         meeting = await client.get_meeting(meeting_id=params.meeting_id)
-        return ActionResult.ok(
+        return ActionResult.success(
             {
                 "meeting_id": params.meeting_id,
                 "subject": meeting.get("subject", "Meeting"),
@@ -72,7 +72,7 @@ async def create_meeting(ctx, params: CreateMeetingParams) -> ActionResult:
             conference_call_info=params.conference_call_info
         )
         mid = meeting.get("meetingid") or meeting.get("meetingId") or 0
-        return ActionResult.ok(
+        return ActionResult.success(
             {
                 "meeting_id": mid,
                 "subject": params.subject,
@@ -99,7 +99,7 @@ async def delete_meeting(ctx, params: DeleteMeetingParams) -> ActionResult:
     client = await resolve_client(ctx, params.connection_id)
     try:
         await client.delete_meeting(meeting_id=params.meeting_id)
-        return ActionResult.ok({"status": "deleted", "meeting_id": params.meeting_id}, summary=f"Deleted GoTo meeting {params.meeting_id}.")
+        return ActionResult.success({"status": "deleted", "meeting_id": params.meeting_id}, summary=f"Deleted GoTo meeting {params.meeting_id}.")
     except Exception as e:
         return ActionResult.error(f"Error deleting meeting: {e}")
 
@@ -115,7 +115,7 @@ async def audit_goto_health(ctx, params: AuditHealthParams) -> ActionResult:
     client = await resolve_client(ctx, params.connection_id)
     try:
         meetings = await client.list_meetings(historical=False)
-        return ActionResult.ok(
+        return ActionResult.success(
             {
                 "status": "healthy",
                 "user": "Connected Organizer",
@@ -125,7 +125,7 @@ async def audit_goto_health(ctx, params: AuditHealthParams) -> ActionResult:
             summary=f"GoTo Meeting health verified. {len(meetings)} active meetings."
         )
     except Exception as e:
-        return ActionResult.ok(
+        return ActionResult.success(
             {
                 "status": "degraded",
                 "user": "Unknown",
