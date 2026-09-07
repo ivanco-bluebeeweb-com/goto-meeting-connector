@@ -623,5 +623,12 @@
       "create_meeting": 16,
       "delete_meeting": 16
     }
-  }
+  },
+  "secrets": [
+    {
+      "name": "goto_meeting_connections",
+      "description": "Stored encrypted connections and credentials for goto-meeting-connector",
+      "required": false
+    }
+  ]
 }
